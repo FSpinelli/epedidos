@@ -12,14 +12,14 @@ from django.contrib.auth import authenticate, login as auth_login, logout
 from api.forms import *
 from api.models import *
 
-
+@csrf_exempt
 def index(request):
     return HttpResponse("epedidos api")
 
 @csrf_exempt
 def signup(request):
-    if request.method == 'GET':
-        register_form = RegisterForm(data=request.GET)
+    if request.method == 'POST':
+        register_form = RegisterForm(data=request.POST)
         if register_form.is_valid():
             try:
                 register = register_form.save()
@@ -28,13 +28,13 @@ def signup(request):
                 user = User.objects.filter(pk=register.pk)
                 user_serializer = serializers.serialize("json", user)
                 a = AccountSystem()
-                a.name = request.GET.get('name',False)
+                a.name = request.POST.get('name',False)
                 a.save()
                 user_profile = UserProfile()
                 user_profile.user = User.objects.get(pk=register.pk)
                 user_profile.account_system = a
                 user_profile.save()
-                return HttpResponse(user_serializer)
+                return HttpResponse('201')
             except:
                 return HttpResponse('500')
         else:
